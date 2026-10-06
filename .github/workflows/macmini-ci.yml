@@ -20,7 +20,7 @@ defaults:
     shell: bash -e -o pipefail {0}
 jobs:
   check:
-    name: Offline source checks
+    name: Offline checks and Python package build
     if: ${{ github.actor == github.repository_owner && (github.event_name == 'push' || github.event_name == 
       'workflow_dispatch') }}
     runs-on:
@@ -40,8 +40,20 @@ jobs:
         submodules: false
     - name: Offline syntax and manifest checks
       run: python3 /Users/Shared/macmini-ci/bin/validate-assets.py
+    - name: Build Python sdist and wheel
+      run: uv run --no-project --python 3.12 --with build==1.3.0 python -m build --sdist --wheel --installer uv
     - name: Record check coverage
       run: python3 /Users/Shared/macmini-ci/bin/project-ci.py
+    - name: Upload Python distributions
+      if: ${{ success() && env.MACMINI_FRESH == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: recognizer-python-dist-${{ github.run_id }}-${{ github.run_attempt }}
+        path: |
+          dist/*.whl
+          dist/*.tar.gz
+        retention-days: 7
+        if-no-files-found: error
     - name: Collect CI outputs
       if: ${{ always() && env.MACMINI_FRESH == 'true' }}
       run: python3 /Users/Shared/macmini-ci/bin/collect-artifacts.py
