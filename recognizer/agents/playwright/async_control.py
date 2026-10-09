@@ -175,7 +175,8 @@ class AsyncChallenger:
             elif not await self.click_checkbox():
                 raise TypedTimeoutError("Invisible reCaptcha Timed Out.")
 
-        assert await self.check_captcha_visible(), TypedTimeoutError("[ERROR] reCaptcha Challenge is not visible.")
+        if not await self.check_captcha_visible():
+            raise TypedTimeoutError("[ERROR] reCaptcha Challenge is not visible.")
 
         # Clicking Reload Button
         if reset:

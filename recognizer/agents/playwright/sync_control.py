@@ -175,7 +175,8 @@ class SyncChallenger:
             elif not self.click_checkbox():
                 raise TypedTimeoutError("Invisible reCaptcha Timed Out.")
 
-        assert self.check_captcha_visible(), TypedTimeoutError("[ERROR] reCaptcha Challenge is not visible.")
+        if not self.check_captcha_visible():
+            raise TypedTimeoutError("[ERROR] reCaptcha Challenge is not visible.")
 
         # Clicking Reload Button
         if reset:
