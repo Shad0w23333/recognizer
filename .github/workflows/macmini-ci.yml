@@ -44,16 +44,22 @@ jobs:
     - name: Offline syntax and manifest checks
       if: ${{ env.MACMINI_FRESH == 'true' }}
       run: python3 /Users/Shared/macmini-ci/bin/validate-assets.py
+    - name: Validate cached Chrome Browser
+      id: chrome_cache
+      if: ${{ env.MACMINI_FRESH == 'true' }}
+      run: |
+        python3 -m unittest discover -s .github/scripts/tests -p test_resolve_chrome_cache.py -v
+        python3 .github/scripts/resolve-chrome-cache.py
     - name: Install Chrome Browser
       id: chrome
-      if: ${{ env.MACMINI_FRESH == 'true' }}
+      if: ${{ env.MACMINI_FRESH == 'true' && steps.chrome_cache.outputs.cache-hit != 'true' }}
       uses: browser-actions/setup-chrome@v1
       with:
         chrome-version: '131.0.6778.33'
     - name: Lint, model-backed tests and Python package build
       if: ${{ env.MACMINI_FRESH == 'true' }}
       env:
-        CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        CHROME_PATH: ${{ steps.chrome_cache.outputs.chrome-path || steps.chrome.outputs.chrome-path }}
       run: python3 /Users/Shared/macmini-ci/bin/project-ci.py
     - name: Upload Python distributions
       if: ${{ success() && env.MACMINI_FRESH == 'true' }}
