@@ -20,6 +20,7 @@ async def test_async_challenger(async_page: Page):
         res = await challenger.solve_recaptcha()
         assert res
 
+
 @pytest.mark.asyncio
 async def test_async_challenger1(async_page: Page):
     challenger = AsyncChallenger(async_page, click_timeout=1000)

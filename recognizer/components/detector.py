@@ -5,7 +5,7 @@ import random
 import sys
 import warnings
 from concurrent.futures import Future, ThreadPoolExecutor
-from os import PathLike
+from os import PathLike, environ
 from pathlib import Path
 from typing import Callable, List, Optional, Sequence, Tuple, Union
 
@@ -42,7 +42,7 @@ warnings.filterwarnings("ignore", category=UserWarning, message="TypedStorage is
 class DetectionModels:
     def __init__(self) -> None:
         # Preloading: Loading Models takes ~9 seconds
-        set_num_threads(5)
+        set_num_threads(int(environ.get("RECOGNIZER_NUM_THREADS", "5")))
         self.executor = ThreadPoolExecutor(max_workers=5)
         self.loading_futures: List[Future[Callable[..., None]]] = []
 
@@ -60,7 +60,7 @@ class DetectionModels:
             raise e
 
     def _load_yolo_detector(self):
-        from ultralytics import YOLO
+        from ultralytics.models import YOLO
 
         self.yolo_model = YOLO("yolo11m-seg.pt")
 
@@ -128,7 +128,8 @@ class YoloDetector:
         outputs = detection_models.yolo_model.predict(image, verbose=False, conf=0.2, iou=0.3)  # , save=True
         results = outputs[0]
 
-        for result in results:
+        for result_index in range(len(results)):
+            result = results[result_index]
             assert result
             # Check if correct task type
             class_index = int(result.boxes.cls[0])

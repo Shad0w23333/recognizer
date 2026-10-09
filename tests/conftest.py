@@ -1,3 +1,5 @@
+import os
+
 import pytest
 import pytest_asyncio
 from patchright.async_api import async_playwright
@@ -20,7 +22,9 @@ def sync_playwright_object():
 
 @pytest.fixture
 def sync_browser(sync_playwright_object):
-    browser = sync_playwright_object.chromium.launch_persistent_context(user_data_dir="./user_data", channel="chrome", headless=True, no_viewport=True, locale="en-US")
+    browser = sync_playwright_object.chromium.launch_persistent_context(
+        user_data_dir="./user_data", channel="chrome", executable_path=os.environ.get("CHROME_PATH") or None, headless=True, no_viewport=True, locale="en-US"
+    )
 
     yield browser
     browser.close()
@@ -42,7 +46,9 @@ async def async_playwright_object():
 
 @pytest_asyncio.fixture
 async def async_browser(async_playwright_object):
-    browser = await async_playwright_object.chromium.launch_persistent_context(user_data_dir="./user_data", channel="chrome", headless=True, no_viewport=True, locale="en-US")
+    browser = await async_playwright_object.chromium.launch_persistent_context(
+        user_data_dir="./user_data", channel="chrome", executable_path=os.environ.get("CHROME_PATH") or None, headless=True, no_viewport=True, locale="en-US"
+    )
 
     yield browser
     await browser.close()

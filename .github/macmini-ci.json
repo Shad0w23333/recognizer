@@ -1,0 +1,13 @@
+{
+  "platform": "macos",
+  "commands": [
+    [
+      "bash",
+      ".github/scripts/macmini-build.sh"
+    ]
+  ],
+  "outputs": [
+    "dist/*.whl",
+    "dist/*.tar.gz"
+  ]
+}
